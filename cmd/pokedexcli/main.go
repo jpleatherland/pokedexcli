@@ -4,12 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
+	"time"
+
+	"github.com/jpleatherland/pokedexcli/internal/pokecache"
 )
 
 func main() {
 	userInput := bufio.NewScanner(os.Stdin)
 	currentState := new(currentState)
 	currentState.pokemap = new(pokeMap)
+	currentState.pokecache = pokecache.NewCache(time.Duration(5 * time.Minute))
+
 	for {
 		fmt.Print("Pokedex > ")
 		userInput.Scan()
@@ -24,7 +30,7 @@ func main() {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*currentState) error
+	callback    func(*currentState, []string) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -41,7 +47,7 @@ func getCommands() map[string]cliCommand {
 		},
 		"map": {
 			name:        "map",
-			description: "Prints the current locations",
+			description: "Prints the current locations or gets locations if no current locations exist",
 			callback:    pokemap,
 		},
 		"mapn": {
@@ -59,11 +65,18 @@ func getCommands() map[string]cliCommand {
 
 func executeCommand(userInput string, currentState currentState) error {
 	commands := getCommands()
-	command, exists := commands[userInput]
+	splitUserInput := strings.Split(userInput, " ")
+	command, exists := commands[splitUserInput[0]]
+	var userArgs []string
 	if !exists {
 		return fmt.Errorf("unknown command")
 	}
-	err := command.callback(&currentState)
+	if len(splitUserInput) > 1 {
+		userArgs = splitUserInput[1:]
+	} else {
+		userArgs = nil
+	}
+	err := command.callback(&currentState, userArgs)
 	if err != nil {
 		return err
 	}
@@ -71,5 +84,6 @@ func executeCommand(userInput string, currentState currentState) error {
 }
 
 type currentState struct {
-	pokemap *pokeMap
+	pokemap   *pokeMap
+	pokecache *pokecache.Cache
 }
