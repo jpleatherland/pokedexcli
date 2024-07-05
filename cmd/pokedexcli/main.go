@@ -60,6 +60,11 @@ func getCommands() map[string]cliCommand {
 			description: "Prints the previous set of locations and sets the current map",
 			callback:    pokemapPrev,
 		},
+		"explore": {
+			name:        "explore",
+			description: "Pass in an area name to receive additional information about the area",
+			callback:    explore,
+		},
 	}
 }
 
