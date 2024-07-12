@@ -10,7 +10,7 @@ import (
 
 func pokemap(currentState *currentState, _ []string) error {
 	if len(currentState.pokemap.Results) == 0 {
-		res, err := http.Get("https://pokeapi.co/api/v2/location/")
+		res, err := http.Get("https://pokeapi.co/api/v2/location-area/")
 		if err != nil {
 			return err
 		}

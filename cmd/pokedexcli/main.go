@@ -19,7 +19,7 @@ func main() {
 	for {
 		fmt.Print("Pokedex > ")
 		userInput.Scan()
-		err := executeCommand(userInput.Text(), *currentState)
+		err := executeCommand(userInput.Text(), currentState)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -65,10 +65,15 @@ func getCommands() map[string]cliCommand {
 			description: "Pass in an area name to receive additional information about the area",
 			callback:    explore,
 		},
+		"catch": {
+			name:        "catch",
+			description: "Pass in a pokemon name that you have encountered in the area to try and catch it",
+			callback:    catch,
+		},
 	}
 }
 
-func executeCommand(userInput string, currentState currentState) error {
+func executeCommand(userInput string, currentState *currentState) error {
 	commands := getCommands()
 	splitUserInput := strings.Split(userInput, " ")
 	command, exists := commands[splitUserInput[0]]
@@ -81,7 +86,7 @@ func executeCommand(userInput string, currentState currentState) error {
 	} else {
 		userArgs = nil
 	}
-	err := command.callback(&currentState, userArgs)
+	err := command.callback(currentState, userArgs)
 	if err != nil {
 		return err
 	}
@@ -89,6 +94,8 @@ func executeCommand(userInput string, currentState currentState) error {
 }
 
 type currentState struct {
-	pokemap   *pokeMap
-	pokecache *pokecache.Cache
+	pokemap       *pokeMap
+	pokecache     *pokecache.Cache
+	pokemonInArea []string
+	caughtPokemon []pokemon
 }
