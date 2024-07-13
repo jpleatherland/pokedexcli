@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"slices"
 )
@@ -40,14 +41,31 @@ func catch(currentState *currentState, args []string) error {
 		errText := fmt.Sprintf("Response failed with status code: %d and \nbody: %s\n", res.StatusCode, body)
 		return errors.New(errText)
 	}
+
 	var tmpPokemon pokemon
 	json.Unmarshal(body, &tmpPokemon)
-	// check pokemon base experience
-	// if < 100 rand int over 25 will catch
-	// if < 200 rand int over 50 will catch
-	// if > 200 rand int over 75 will catch
-	currentState.caughtPokemon = append(currentState.caughtPokemon, tmpPokemon)
-	fmt.Println("caught pokemon: " + currentState.caughtPokemon[0].Name)
+
+	catchAttempt := rand.Intn(100)
+	var caught bool = false
+
+	if tmpPokemon.BaseExperience < 100 && catchAttempt > 24 {
+		caught = true
+	}
+	if tmpPokemon.BaseExperience < 200 && catchAttempt > 49 {
+		caught = true
+	}
+	if tmpPokemon.BaseExperience > 200 && catchAttempt > 74 {
+		caught = true
+	}
+
+	if caught {
+		currentState.caughtPokemon[tmpPokemon.Name] = tmpPokemon
+		fmt.Println("caught pokemon: " + tmpPokemon.Name)
+	} else {
+		fmt.Printf("%s broke free\n", tmpPokemon.Name)
+		fmt.Printf("%s ran away\n", tmpPokemon.Name)
+	}
+
 	return nil
 }
 
@@ -71,4 +89,18 @@ type pokemon struct {
 			URL  string `json:"url"`
 		} `json:"type"`
 	} `json:"types"`
+}
+
+func (p *pokemon) print() {
+	fmt.Printf("Name: %s\n", p.Name)
+	fmt.Printf("Height: %v\n", p.Height)
+	fmt.Printf("Weight: %v\n", p.Weight)
+	fmt.Println("Stats:")
+	for stat := range p.Stats {
+		fmt.Printf("  -%s: %v\n", p.Stats[stat].Stat.Name, p.Stats[stat].BaseStat)
+	}
+	fmt.Println("Types: ")
+	for pokeType := range p.Types {
+		fmt.Printf("  - %s\n", p.Types[pokeType].Type.Name)
+	}
 }

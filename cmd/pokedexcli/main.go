@@ -15,6 +15,7 @@ func main() {
 	currentState := new(currentState)
 	currentState.pokemap = new(pokeMap)
 	currentState.pokecache = pokecache.NewCache(time.Duration(5 * time.Minute))
+	currentState.caughtPokemon = make(map[string]pokemon)
 
 	for {
 		fmt.Print("Pokedex > ")
@@ -70,6 +71,16 @@ func getCommands() map[string]cliCommand {
 			description: "Pass in a pokemon name that you have encountered in the area to try and catch it",
 			callback:    catch,
 		},
+		"inspect": {
+			name:        "inspect",
+			description: "See details about pokemon you have caught",
+			callback:    inspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Print out the names of all caught pokemon",
+			callback:    pokedex,
+		},
 	}
 }
 
@@ -97,5 +108,5 @@ type currentState struct {
 	pokemap       *pokeMap
 	pokecache     *pokecache.Cache
 	pokemonInArea []string
-	caughtPokemon []pokemon
+	caughtPokemon map[string]pokemon
 }

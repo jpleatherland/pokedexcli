@@ -1,11 +1,20 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func commandHelp(_ *currentState, _ []string) error {
 	fmt.Print("\n")
-	for _, contents := range getCommands() {
-		fmt.Printf("%s: %s\n", contents.name, contents.description)
+	commands := getCommands()
+	keys := make([]string, 0, len(commands))
+	for k := range commands {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		fmt.Printf("%s: %s\n", key, commands[key].description)
 	}
 	return nil
 }
